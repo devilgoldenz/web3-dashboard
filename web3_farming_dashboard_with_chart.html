@@ -1,0 +1,325 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Modular Web3 Farming Dashboard</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+    h2 { color: #2c3e50; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: white; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #efefef; }
+    .input-row input { margin: 5px 3px; padding: 4px; }
+    .btn { padding: 6px 12px; cursor: pointer; }
+    section { margin-bottom: 40px; padding: 15px; background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+
+<div style="margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 10px;">
+  <label><strong>📤 Import Wallets (CSV/JSON):</strong>
+    <input type="file" accept=".csv,.json" onchange="handleWalletImport(event)">
+  </label>
+  <label><strong>📤 Import RPCs (CSV/JSON):</strong>
+    <input type="file" accept=".csv,.json" onchange="handleRPCImport(event)">
+  </label>
+</div>
+
+
+<div style="margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 10px;">
+  <button class="btn" onclick="saveToLocalStorage()">💾 Simpan ke Browser</button>
+  <button class="btn" onclick="loadFromLocalStorage()">📂 Load dari Browser</button>
+  <button class="btn" onclick="exportWalletsToCSV()">⬇️ Export Wallets CSV</button>
+  <button class="btn" onclick="exportRPCsToCSV()">⬇️ Export RPCs CSV</button>
+</div>
+
+
+<h1>📊 Web3 Farming Dashboard</h1>
+
+<!-- 1. Wallet Tracker -->
+<section id="wallet-tracker">
+  <h2>📁 1. Multi Wallet Tracker</h2>
+  <table><thead><tr><th>Wallet</th><th>Tipe</th><th>Network</th><th>Status</th><th>Catatan</th></tr></thead><tbody id="wallet-list"></tbody><th>Aksi</th></tr></thead><tbody id="wallet-list"></tbody></table>
+  <div class="input-row">
+    <input type="text" id="input-wallet-name" placeholder="Wallet Name" />
+    <input type="text" id="input-wallet-type" placeholder="Tipe" />
+    <input type="text" id="input-wallet-network" placeholder="Network" />
+    <input type="text" id="input-wallet-status" placeholder="Status" />
+    <input type="text" id="input-wallet-note" placeholder="Catatan" />
+    <button class="btn" onclick="addWallet()">➕ Tambah</button>
+  </div>
+</section>
+
+<!-- 2. RPC Tracker -->
+<section id="rpc-tracker">
+  <h2>🌐 2. RPC & Network Tracker</h2>
+  <table><thead><tr><th>Network</th><th>Chain ID</th><th>RPC URL</th><th>Explorer</th><th>Aksi</th></tr></thead><tbody id="rpc-list"></tbody><th>Aksi</th></tr></thead><tbody id="wallet-list"></tbody></table>
+  <div class="input-row">
+    <input type="text" id="input-rpc-network" placeholder="Network" />
+    <input type="text" id="input-rpc-chainid" placeholder="Chain ID" />
+    <input type="text" id="input-rpc-url" placeholder="RPC URL" />
+    <input type="text" id="input-rpc-explorer" placeholder="Explorer" />
+    <button class="btn" onclick="addRPC()">➕ Tambah</button>
+  </div>
+</section>
+
+<!-- 3. Aktivitas Harian -->
+<section id="daily-activity">
+  <h2>📆 3. Aktivitas Harian</h2>
+  <table><thead><tr><th>Tanggal</th><th>Wallet</th><th>Aktivitas</th><th>TX Hash</th><th>Status</th></tr></thead><tbody id="daily-activity-list"></tbody><th>Aksi</th></tr></thead><tbody id="wallet-list"></tbody></table>
+</section>
+
+<!-- 4. Misi zk & L3 -->
+<section id="zk-l3-mission">
+  <h2>🧪 4. zk / Modular / Layer 3 Missions</h2>
+  <table><thead><tr><th>Project</th><th>Chain</th><th>Jenis</th><th>TX Hash</th><th>Status</th></tr></thead><tbody id="zk-l3-list"></tbody><th>Aksi</th></tr></thead><tbody id="wallet-list"></tbody></table>
+</section>
+
+<!-- 5. Evaluasi Wallet -->
+<section id="wallet-eval">
+  <h2>🛡️ 5. Evaluasi Wallet</h2>
+  <table><thead><tr><th>Wallet</th><th>Skor</th><th>Status</th><th>Catatan</th></tr></thead><tbody id="wallet-eval-list"></tbody><th>Aksi</th></tr></thead><tbody id="wallet-list"></tbody></table>
+</section>
+
+<!-- 6. Log Keamanan -->
+<section id="security-log">
+  <h2>🔐 6. Log Keamanan</h2>
+  <table><thead><tr><th>Wallet</th><th>Tanggal</th><th>Aksi</th><th>Catatan</th></tr></thead><tbody id="security-log-list"></tbody><th>Aksi</th></tr></thead><tbody id="wallet-list"></tbody></table>
+</section>
+
+<!-- 7. Tracker Mingguan -->
+<section id="weekly-tracker">
+  <h2>📅 7. Tracker Aktivitas Mingguan</h2>
+  <table><thead><tr><th>Hari</th><th>Wallet</th><th>Chain</th><th>Aktivitas</th><th>Status</th><th>Catatan</th></tr></thead><tbody id="weekly-tracker-list"></tbody><th>Aksi</th></tr></thead><tbody id="wallet-list"></tbody></table>
+</section>
+
+<!-- 8. Project Farming Aktif -->
+<section id="project-farming">
+  <h2>🚀 8. Eksplorasi Project Farming Aktif</h2>
+  <table><thead><tr><th>Project</th><th>Platform</th><th>Potensi</th><th>Status</th><th>Tugas</th><th>TX Bukti</th></tr></thead><tbody id="project-farming-list"></tbody><th>Aksi</th></tr></thead><tbody id="wallet-list"></tbody></table>
+</section>
+
+<script>
+  // Wallet tracker data
+  const wallets = [
+    { name: "Wallet A", type: "Farming", network: "zkSync", status: "Aktif", note: "Wallet harian" }
+  ];
+  
+  function deleteWallet(index) {
+    wallets.splice(index, 1);
+    renderWallets();
+  }
+  function renderWallets() {
+  
+    const tbody = document.getElementById("wallet-list");
+    tbody.innerHTML = "";
+    
+    wallets.forEach((w, i) => {
+      tbody.innerHTML += `<tr>
+        <td><input value="${w.name}" onchange="wallets[${i}].name=this.value"/></td>
+        <td><input value="${w.type}" onchange="wallets[${i}].type=this.value"/></td>
+        <td><input value="${w.network}" onchange="wallets[${i}].network=this.value"/></td>
+        <td><input value="${w.status}" onchange="wallets[${i}].status=this.value"/></td>
+        <td><input value="${w.note}" onchange="wallets[${i}].note=this.value"/></td>
+        <td><button onclick="deleteWallet(${i})">🗑️</button></td>
+      </tr>`;
+    });
+  
+  }
+  function addWallet() {
+    const w = {
+      name: document.getElementById("input-wallet-name").value,
+      type: document.getElementById("input-wallet-type").value,
+      network: document.getElementById("input-wallet-network").value,
+      status: document.getElementById("input-wallet-status").value,
+      note: document.getElementById("input-wallet-note").value
+    };
+    if (w.name && w.network) { wallets.push(w); renderWallets(); }
+  }
+
+  // RPC tracker data
+  const rpcs = [
+    { network: "zkSync", chainId: "324", rpc: "https://mainnet.era.zksync.io", explorer: "https://explorer.zksync.io" }
+  ];
+  
+  function deleteRPC(index) {
+    rpcs.splice(index, 1);
+    renderRPCs();
+  }
+  function renderRPCs() {
+  
+    const tbody = document.getElementById("rpc-list");
+    tbody.innerHTML = "";
+    
+    rpcs.forEach((r, i) => {
+      tbody.innerHTML += `<tr>
+        <td><input value="${r.network}" onchange="rpcs[${i}].network=this.value"/></td>
+        <td><input value="${r.chainId}" onchange="rpcs[${i}].chainId=this.value"/></td>
+        <td><input value="${r.rpc}" onchange="rpcs[${i}].rpc=this.value"/></td>
+        <td><input value="${r.explorer}" onchange="rpcs[${i}].explorer=this.value"/></td>
+        <td><button onclick="deleteRPC(${i})">🗑️</button></td>
+      </tr>`;
+    });
+  
+  }
+  function addRPC() {
+    const r = {
+      network: document.getElementById("input-rpc-network").value,
+      chainId: document.getElementById("input-rpc-chainid").value,
+      rpc: document.getElementById("input-rpc-url").value,
+      explorer: document.getElementById("input-rpc-explorer").value
+    };
+    if (r.network && r.chainId && r.rpc) { rpcs.push(r); renderRPCs(); }
+  }
+
+  // Render all
+  renderWallets();
+  renderRPCs();
+
+  // Simpan dan muat data dari localStorage
+  function saveToLocalStorage() {
+    localStorage.setItem("wallets", JSON.stringify(wallets));
+    localStorage.setItem("rpcs", JSON.stringify(rpcs));
+    alert("✅ Data tersimpan di browser (localStorage).");
+  }
+  function loadFromLocalStorage() {
+    const w = localStorage.getItem("wallets");
+    const r = localStorage.getItem("rpcs");
+    if (w) wallets.splice(0, wallets.length, ...JSON.parse(w));
+    if (r) rpcs.splice(0, rpcs.length, ...JSON.parse(r));
+    renderWallets();
+    renderRPCs();
+    alert("🔄 Data dimuat dari browser (localStorage).");
+  }
+
+  // Export ke CSV
+  function exportWalletsToCSV() {
+    let csv = "Wallet,Tipe,Network,Status,Catatan\n";
+    wallets.forEach(w => {
+      csv += `${w.name},${w.type},${w.network},${w.status},${w.note}\n`;
+    });
+    downloadCSV(csv, "wallets_export.csv");
+  }
+
+  function exportRPCsToCSV() {
+    let csv = "Network,Chain ID,RPC URL,Explorer\n";
+    rpcs.forEach(r => {
+      csv += `${r.network},${r.chainId},${r.rpc},${r.explorer}\n`;
+    });
+    downloadCSV(csv, "rpcs_export.csv");
+  }
+
+  function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+
+  function handleWalletImport(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      const content = reader.result;
+      if (file.name.endsWith(".json")) {
+        wallets.splice(0, wallets.length, ...JSON.parse(content));
+      } else {
+        const rows = content.trim().split("\n").slice(1); // skip header
+        wallets.splice(0, wallets.length, ...rows.map(row => {
+          const [name, type, network, status, note] = row.split(",");
+          return { name, type, network, status, note };
+        }));
+      }
+      renderWallets();
+    };
+    reader.readAsText(file);
+  }
+
+  function handleRPCImport(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      const content = reader.result;
+      if (file.name.endsWith(".json")) {
+        rpcs.splice(0, rpcs.length, ...JSON.parse(content));
+      } else {
+        const rows = content.trim().split("\n").slice(1); // skip header
+        rpcs.splice(0, rpcs.length, ...rows.map(row => {
+          const [network, chainId, rpc, explorer] = row.split(",");
+          return { network, chainId, rpc, explorer };
+        }));
+      }
+      renderRPCs();
+    };
+    reader.readAsText(file);
+  }
+
+
+<script>
+  const ctx = document.getElementById('activityChart').getContext('2d');
+  const activityChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"],
+      datasets: [{
+        label: "Jumlah Aktivitas Wallet",
+        data: [4, 7, 3, 5, 6, 2, 8],
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js">
+<script>
+  const ctx = document.getElementById('activityChart').getContext('2d');
+  const activityChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"],
+      datasets: [{
+        label: "Jumlah Aktivitas Wallet",
+        data: [4, 7, 3, 5, 6, 2, 8],
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+</script>
+<canvas id="activityChart" width="400" height="150" style="background: white; padding: 10px; border-radius: 10px;"></canvas>
+
+</body>
+</html>
