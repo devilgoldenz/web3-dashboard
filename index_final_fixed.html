@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Web3 Farming Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; }
+        h2 { margin-top: 2em; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        input, select, button { padding: 6px; margin: 4px 0; }
+        .btn-danger { background: #e74c3c; color: white; border: none; cursor: pointer; }
+        .btn-primary { background: #3498db; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Web3 Farming Dashboard</h1>
+
+    <h2>Tambah Wallet</h2>
+    <input id="walletName" placeholder="Nama Wallet">
+    <input id="walletType" placeholder="Tipe (EVM/Solana)">
+    <input id="walletNetwork" placeholder="Network">
+    <input id="walletStatus" placeholder="Status">
+    <input id="walletNote" placeholder="Catatan">
+    <button class="btn-primary" onclick="addWallet()">Tambah Wallet</button>
+
+    <h2>Daftar Wallet</h2>
+    <table id="walletTable">
+        <thead>
+            <tr>
+                <th>Nama</th><th>Tipe</th><th>Network</th><th>Status</th><th>Catatan</th><th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const walletTable = document.querySelector("#walletTable tbody");
+
+            function renderWallets() {
+                walletTable.innerHTML = "";
+                const data = JSON.parse(localStorage.getItem("wallets") || "[]");
+                data.forEach((wallet, index) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td contenteditable onblur="editWallet(${index}, 'name', this.innerText)">${wallet.name}</td>
+                        <td contenteditable onblur="editWallet(${index}, 'type', this.innerText)">${wallet.type}</td>
+                        <td contenteditable onblur="editWallet(${index}, 'network', this.innerText)">${wallet.network}</td>
+                        <td contenteditable onblur="editWallet(${index}, 'status', this.innerText)">${wallet.status}</td>
+                        <td contenteditable onblur="editWallet(${index}, 'note', this.innerText)">${wallet.note}</td>
+                        <td><button class="btn-danger" onclick="deleteWallet(${index})">Hapus</button></td>
+                    `;
+                    walletTable.appendChild(row);
+                });
+            }
+
+            window.addWallet = function () {
+                const name = document.getElementById("walletName").value;
+                const type = document.getElementById("walletType").value;
+                const network = document.getElementById("walletNetwork").value;
+                const status = document.getElementById("walletStatus").value;
+                const note = document.getElementById("walletNote").value;
+                const data = JSON.parse(localStorage.getItem("wallets") || "[]");
+                data.push({ name, type, network, status, note });
+                localStorage.setItem("wallets", JSON.stringify(data));
+                renderWallets();
+            }
+
+            window.editWallet = function (index, field, value) {
+                const data = JSON.parse(localStorage.getItem("wallets") || "[]");
+                data[index][field] = value;
+                localStorage.setItem("wallets", JSON.stringify(data));
+            }
+
+            window.deleteWallet = function (index) {
+                const data = JSON.parse(localStorage.getItem("wallets") || "[]");
+                data.splice(index, 1);
+                localStorage.setItem("wallets", JSON.stringify(data));
+                renderWallets();
+            }
+
+            renderWallets();
+        });
+    </script>
+</body>
+</html>
